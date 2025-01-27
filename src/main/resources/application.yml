@@ -1,0 +1,56 @@
+# Server configuration
+server:
+  port: 8080
+
+spring:
+  application:
+    name: message-persister
+  # Disable all database configurations to prevent connection attempts
+  datasource:
+    enabled: false
+  data:
+    mongodb:
+      enabled: false
+  # Disable auto-configuration for databases
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.mongodb.MongoDataAutoConfiguration
+      - org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration
+  
+  jpa:
+    # Disable JPA initialization
+    enabled: false
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+
+# Springdoc OpenAPI Configuration
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+    disable-swagger-default-url: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    root: INFO
+    ai.shreds: DEBUG
+    org.springframework.web: INFO
+    # Disable database-related logging
+    org.springframework.data.mongodb: OFF
+    org.springframework.data.jpa: OFF
+    org.hibernate: OFF
