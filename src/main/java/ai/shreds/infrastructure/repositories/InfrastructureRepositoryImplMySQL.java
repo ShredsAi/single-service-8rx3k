@@ -72,6 +72,45 @@ public class InfrastructureRepositoryImplMySQL implements DomainOutputPortMySQLR
         }
     }
 
+    @Override
+    @Transactional
+    public void deleteById(Long id) {
+        logger.debug("Attempting to delete message with ID: {}", id);
+        try {
+            if (id == null) {
+                throw new DomainExceptionPersistence("ID cannot be null");
+            }
+            jpaRepository.deleteById(id);
+            logger.info("Successfully deleted message with ID: {}", id);
+        } catch (EntityNotFoundException enf) {
+            logger.warn("Message with ID {} not found for deletion", id);
+            throw new DomainExceptionPersistence("Message not found with ID: " + id);
+        } catch (PersistenceException pe) {
+            logger.error("Error deleting message with ID {}: {}", id, pe.getMessage());
+            if (pe.getCause() instanceof SQLException) {
+                throw exceptionPersistence.handleMySQLError((SQLException) pe.getCause());
+            }
+            throw new DomainExceptionPersistence("Error deleting message: " + pe.getMessage());
+        }
+    }
+
+    @Override
+    public boolean existsById(Long id) {
+        logger.debug("Checking if message exists with ID: {}", id);
+        try {
+            if (id == null) {
+                return false;
+            }
+            return jpaRepository.existsById(id);
+        } catch (PersistenceException pe) {
+            logger.error("Error checking message existence with ID {}: {}", id, pe.getMessage());
+            if (pe.getCause() instanceof SQLException) {
+                throw exceptionPersistence.handleMySQLError((SQLException) pe.getCause());
+            }
+            throw new DomainExceptionPersistence("Error checking message existence: " + pe.getMessage());
+        }
+    }
+
     private InfrastructureEntityMessage createEntity(String message) {
         InfrastructureEntityMessage entity = new InfrastructureEntityMessage();
         entity.setMessageText(message);

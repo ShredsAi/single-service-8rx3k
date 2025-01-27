@@ -1,4 +1,4 @@
-package ai.shreds.infrastructure.repositories;
+package ai.shreds.infrastructure.entities;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;

@@ -45,19 +45,19 @@ public class InfrastructureExceptionPersistence extends RuntimeException {
             if (ex.getMessage().contains("Duplicate entry")) {
                 return new DomainExceptionPersistence(
                     "A duplicate record already exists",
-                    "MYSQL_DUPLICATE_001"
+                    ex
                 );
             }
             return new DomainExceptionPersistence(
                 "Data integrity violation occurred",
-                "MYSQL_CONSTRAINT_001"
+                ex
             );
         }
 
         if (ex instanceof SQLTimeoutException) {
             return new DomainExceptionPersistence(
                 "Database operation timed out",
-                "MYSQL_TIMEOUT_001"
+                ex
             );
         }
 
@@ -66,22 +66,22 @@ public class InfrastructureExceptionPersistence extends RuntimeException {
             case 1040: // Too many connections
                 return new DomainExceptionPersistence(
                     "Database connection pool exhausted",
-                    "MYSQL_CONN_001"
+                    ex
                 );
             case 1064: // SQL syntax error
                 return new DomainExceptionPersistence(
                     "Invalid database query",
-                    "MYSQL_SYNTAX_001"
+                    ex
                 );
             case 1205: // Lock wait timeout
                 return new DomainExceptionPersistence(
                     "Database lock timeout occurred",
-                    "MYSQL_LOCK_001"
+                    ex
                 );
             default:
                 return new DomainExceptionPersistence(
                     "Unexpected MySQL error: " + ex.getMessage(),
-                    "MYSQL_GENERIC_001"
+                    ex
                 );
         }
     }
@@ -92,14 +92,14 @@ public class InfrastructureExceptionPersistence extends RuntimeException {
         if (ex instanceof DuplicateKeyException) {
             return new DomainExceptionPersistence(
                 "A duplicate record already exists in MongoDB",
-                "MONGO_DUPLICATE_001"
+                ex
             );
         }
 
         if (ex instanceof MongoTimeoutException) {
             return new DomainExceptionPersistence(
                 "MongoDB operation timed out",
-                "MONGO_TIMEOUT_001"
+                ex
             );
         }
 
@@ -109,24 +109,24 @@ public class InfrastructureExceptionPersistence extends RuntimeException {
                 case 11000: // Duplicate key
                     return new DomainExceptionPersistence(
                         "Duplicate key violation in MongoDB",
-                        "MONGO_DUPLICATE_002"
+                        writeEx
                     );
                 case 13: // Authentication failed
                     return new DomainExceptionPersistence(
                         "MongoDB authentication failed",
-                        "MONGO_AUTH_001"
+                        writeEx
                     );
                 default:
                     return new DomainExceptionPersistence(
                         "MongoDB write operation failed: " + writeEx.getMessage(),
-                        "MONGO_WRITE_001"
+                        writeEx
                     );
             }
         }
 
         return new DomainExceptionPersistence(
             "Unexpected MongoDB error: " + ex.getMessage(),
-            "MONGO_GENERIC_001"
+            ex
         );
     }
 }

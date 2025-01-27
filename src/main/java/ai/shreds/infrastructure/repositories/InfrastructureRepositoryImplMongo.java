@@ -8,6 +8,7 @@ import com.mongodb.MongoException;
 import com.mongodb.MongoWriteException;
 import com.mongodb.DuplicateKeyException;
 import com.mongodb.MongoTimeoutException;
+import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,6 +75,48 @@ public class InfrastructureRepositoryImplMongo implements DomainOutputPortMongoR
         } catch (Exception e) {
             logger.error("Unexpected error while saving to MongoDB: {}", e.getMessage(), e);
             throw new DomainExceptionPersistence("Unexpected error while saving to MongoDB: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void deleteById(String id) {
+        logger.debug("Attempting to delete document with ID: {}", id);
+        try {
+            if (!isValidObjectId(id)) {
+                throw new DomainExceptionPersistence("Invalid MongoDB ObjectId: " + id);
+            }
+            mongoRepository.deleteById(id);
+            logger.info("Successfully deleted document with ID: {}", id);
+        } catch (MongoException me) {
+            logger.error("Error deleting document with ID {}: {}", id, me.getMessage());
+            throw exceptionPersistence.handleMongoError(me);
+        }
+    }
+
+    @Override
+    public boolean existsById(String id) {
+        logger.debug("Checking if document exists with ID: {}", id);
+        try {
+            if (!isValidObjectId(id)) {
+                return false;
+            }
+            return mongoRepository.existsById(id);
+        } catch (MongoException me) {
+            logger.error("Error checking document existence with ID {}: {}", id, me.getMessage());
+            throw exceptionPersistence.handleMongoError(me);
+        }
+    }
+
+    @Override
+    public boolean isValidObjectId(String id) {
+        if (!StringUtils.hasText(id)) {
+            return false;
+        }
+        try {
+            new ObjectId(id);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
         }
     }
 
